@@ -3,9 +3,10 @@ import { Redis } from 'ioredis';
 import './queue/index.js';   
 import './workers/index.js'; 
 import { apiRouter } from './api/index.js';
+import { config } from './config/index.js';
 
 const app = express();
-const port = 3000;
+
 
 app.use(express.json());
 app.use('/api', apiRouter);
@@ -13,8 +14,8 @@ app.use('/api', apiRouter);
 
 // Connect to Redis (typically local Docker in development).
 const redis = new Redis({
-  host: '127.0.0.1',
-  port: 6379,
+  host: config.redis.host,
+  port: config.redis.port,
 });
 
 // Helpful startup signal so you can tell Redis is reachable.
@@ -28,6 +29,6 @@ app.get('/health', (req, res) => {
 });
 
 // Start the Express server.
-app.listen(port, () => {
-  console.log(`[server] listening on http://localhost:${port}`);
+app.listen(config.server.port, () => {
+  console.log(`[server] listening on http://localhost:${config.server.port}`);
 });

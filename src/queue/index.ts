@@ -1,11 +1,12 @@
 import { Queue } from 'bullmq';
 import {Redis} from 'ioredis';
+import { config } from '../config/index.js';
 
 // Shared Redis connection for BullMQ.
 const redisConnection = new Redis({
-  host: '127.0.0.1',
-  port: 6379,
-  maxRetriesPerRequest: null, // BullMQ requires this specific setting to work properly
+  host: config.redis.host,
+  port: config.redis.port,
+  maxRetriesPerRequest: null, 
 });
 
 // Create the queue used to hand off work to the worker.

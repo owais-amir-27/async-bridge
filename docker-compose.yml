@@ -1,19 +1,22 @@
 version: '3.8'
 
 services:
-  # 1. The Redis Database (The Ticket Rail)
   redis:
     image: redis/redis-stack:latest
     ports:
       - "6379:6379"
-      - "8001:8001" # The Visual UI
+      - "8001:8001" 
 
-  # 2. Your Application (The Waiter & Chef)
   async-bridge:
-    build: .  # Tells Docker to use the Dockerfile in this folder
+    build: .  
     ports:
       - "3000:3000"
     depends_on:
-      - redis # Ensures Redis starts before your app
+      - redis
     volumes:
-      - ./src:/app/src # Syncs your local code to the container for hot-reloading
+      - ./src:/app/src 
+    env_file:
+      - .env
+    environment:
+      - REDIS_HOST=redis 
+      - WEBHOOK_RECEIVER_URL=http://async-bridge:3000/api/webhook-receiver

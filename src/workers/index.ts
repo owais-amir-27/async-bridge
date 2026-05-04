@@ -1,10 +1,11 @@
 import { Worker } from 'bullmq';
 import { Redis } from 'ioredis';
 import axios from 'axios'; // Used to POST the webhook callback
+import { config } from '../config/index.js';
 
 const redisConnection = new Redis({
-  host: '127.0.0.1',
-  port: 6379,
+  host: config.redis.host,
+  port: config.redis.port,
   maxRetriesPerRequest: null,
 });
 
@@ -18,7 +19,7 @@ export const legacyWorker = new Worker(
     const { query, user } = job.data; // Data originally sent by the API route
 
     console.log(`   [legacy] simulating slow database call...`);
-    await sleep(10000); // Simulate a 10-second legacy/database delay
+    await sleep(config.worker.legacyWaitTime); // Simulate a 10-second legacy/database delay
 
     // 1) Build the final result payload.
     const finalData = {
@@ -38,7 +39,7 @@ export const legacyWorker = new Worker(
     // 3) Notify the caller via webhook.
     // Axios POSTs the final payload to the local webhook receiver endpoint.
     try {
-      await axios.post('http://localhost:3000/api/webhook-receiver', {
+      await axios.post(config.worker.webhookUrl, {
         jobId: job.id,
         result: finalData
       });

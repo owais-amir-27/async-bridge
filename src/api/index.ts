@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { legacyQueue } from '../queue/index.js';
 import { Redis } from 'ioredis';
+import { config } from '../config/index.js';
 
 export const apiRouter = Router();
-const redis = new Redis({ host: '127.0.0.1', port: 6379 }); // Shared Redis connection for cache lookups
+const redis = new Redis({ host: config.redis.host, port: config.redis.port }); // Shared Redis connection for cache lookups
 
 apiRouter.post('/fetch-data', async (req, res) => {
   try {
