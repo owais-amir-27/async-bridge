@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  # 1. The Redis Database (The Ticket Rail)
+  redis:
+    image: redis/redis-stack:latest
+    ports:
+      - "6379:6379"
+      - "8001:8001" # The Visual UI
+
+  # 2. Your Application (The Waiter & Chef)
+  async-bridge:
+    build: .  # Tells Docker to use the Dockerfile in this folder
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis # Ensures Redis starts before your app
+    volumes:
+      - ./src:/app/src # Syncs your local code to the container for hot-reloading
