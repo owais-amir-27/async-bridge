@@ -29,34 +29,39 @@ You can test the entire architecture on your local machine right now without ins
 git clone [https://github.com/owais-amir-27/async-bridge.git](https://github.com/owais-amir-27/async-bridge.git)
 cd async-bridge
 cp .env.example .env
-2. Start the Engine
-Bash
+```
+
+### 2. Start the Engine
+```bash
 docker-compose up --build
-3. Send a Test Request
+```
+
+### 3. Send a Test Request
 Open a new terminal and send a POST request to the API.
 
-For Mac/Linux (bash):
-
-Bash
+**For Mac/Linux (bash):**
+```bash
 curl -X POST http://localhost:3000/api/fetch-data \
      -H "Content-Type: application/json" \
      -d '{"query": "get_mortgage_history", "user": "Owais"}'
-For Windows (PowerShell):
+```
 
-PowerShell
+**For Windows (PowerShell):**
+```powershell
 Invoke-RestMethod -Uri http://localhost:3000/api/fetch-data -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"query": "get_mortgage_history", "user": "Owais"}'
-What happens next?
+```
 
-Watch the terminal logs: The server will instantly accept the request.
+**What happens next?**
+1. Watch the terminal logs: The server will instantly accept the request.
+2. The background worker will pick it up and simulate a 10-second legacy database query.
+3. The result is cached, and a webhook is fired to the local receiver.
+4. **Send the exact same request again:** Watch the cache catch it and return the data in 0.01 seconds.
 
-The background worker will pick it up and simulate a 10-second legacy database query.
+---
 
-The result is cached, and a webhook is fired to the local receiver.
+## 🏗️ Architecture
 
-Send the exact same request again: Watch the cache catch it and return the data in 0.01 seconds.
-
-🏗️ Architecture
-Code snippet
+```mermaid
 sequenceDiagram
     participant Client as React/Next.js App
     participant API as Express Gateway
@@ -79,11 +84,10 @@ sequenceDiagram
         Worker->>Redis: Save Result (1hr TTL)
         Worker->>Client: POST Webhook Payload
     end
-⚙️ Environment Variables
-Configure the bridge without touching the source code. See .env.example for defaults:
+```
 
-PORT: The API listening port.
-
-REDIS_HOST / REDIS_PORT: Your Redis connection details.
-
-WEBHOOK_RECEIVER_URL: Where the worker should send the final data.
+## ⚙️ Environment Variables
+Configure the bridge without touching the source code. See `.env.example` for defaults:
+* `PORT`: The API listening port.
+* `REDIS_HOST` / `REDIS_PORT`: Your Redis connection details.
+* `WEBHOOK_RECEIVER_URL`: Where the worker should send the final data.
